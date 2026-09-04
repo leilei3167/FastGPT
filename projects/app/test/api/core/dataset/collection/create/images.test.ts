@@ -108,7 +108,8 @@ describe('POST /api/core/dataset/collection/create/images', () => {
       data: {
         parentId,
         datasetId,
-        collectionName: 'Native image embedding collection'
+        collectionName: 'Native image embedding collection',
+        tags: [{ tag: 'score', value: 10 }]
       },
       fileMetadata: [
         {
@@ -174,6 +175,7 @@ describe('POST /api/core/dataset/collection/create/images', () => {
         datasetId,
         type: DatasetCollectionTypeEnum.images,
         name: 'Native image embedding collection',
+        tags: [{ tag: 'score', value: 10 }],
         trainingType: DatasetCollectionDataProcessModeEnum.chunk
       }
     });

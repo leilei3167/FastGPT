@@ -38,6 +38,10 @@ import { workflowSystemVariables } from '../app/utils';
 import type { WorkflowDataContextType } from '@/pageComponents/app/detail/WorkflowComponents/context/workflowInitContext';
 import type { MyLLMModelItemType } from '@fastgpt/global/openapi/core/ai/model/api';
 import { normalizeFlowNodeInputType } from '@fastgpt/global/core/app/formEdit/utils';
+import {
+  DatasetTagFilterVersionEnum,
+  resolveDatasetTagFilterVersion
+} from '@fastgpt/global/core/dataset/workflowTagFilter';
 
 /**
  * 将节点模板转换为画布节点，并按创建时语言初始化可编辑文本。
@@ -198,6 +202,20 @@ export const storeNode2FlowNode = ({
         isWorkflowSystemModelInput({ node: storeNode, input: templateInput })
     );
   };
+  const collectionFilterVersion =
+    storeNode.flowNodeType === FlowNodeTypeEnum.datasetSearchNode
+      ? resolveDatasetTagFilterVersion({
+          version: adaptedStoreInputs.find(
+            (input) => input.key === NodeInputKeyEnum.collectionFilterVersion
+          )?.value,
+          filterValue: adaptedStoreInputs.find(
+            (input) => input.key === NodeInputKeyEnum.collectionFilterMatch
+          )?.value
+        })
+      : DatasetTagFilterVersionEnum.structured;
+  const usesLegacyDatasetSearchFilter =
+    storeNode.flowNodeType === FlowNodeTypeEnum.datasetSearchNode &&
+    collectionFilterVersion === DatasetTagFilterVersionEnum.legacy;
 
   // replace item data
   const nodeItem: FlowNodeItemType = {
@@ -223,8 +241,30 @@ export const storeNode2FlowNode = ({
           debugLabel: t(inputTemplate.debugLabel ?? (storeInput.debugLabel as any)),
           toolDescription: t(inputTemplate.toolDescription ?? (storeInput.toolDescription as any)),
           key: storeInput.key,
-          selectedType: storeInput.selectedType ?? inputTemplate.selectedType,
-          value: storeInput.value
+          label:
+            usesLegacyDatasetSearchFilter &&
+            inputTemplate.key === NodeInputKeyEnum.collectionFilterMatch
+              ? 'workflow:collection_metadata_filter'
+              : inputTemplate.label,
+          description:
+            usesLegacyDatasetSearchFilter &&
+            inputTemplate.key === NodeInputKeyEnum.collectionFilterMatch
+              ? 'workflow:filter_description'
+              : inputTemplate.description,
+          selectedType: (() => {
+            // 旧节点用 textarea 手写 JSON；切到条件行渲染类型，但保留字符串 value 以便展示升级 UI。
+            if (
+              inputTemplate.key === NodeInputKeyEnum.collectionFilterMatch &&
+              storeInput.selectedType === FlowNodeInputTypeEnum.textarea
+            ) {
+              return FlowNodeInputTypeEnum.datasetTagFilter;
+            }
+            return storeInput.selectedType ?? inputTemplate.selectedType;
+          })(),
+          value:
+            inputTemplate.key === NodeInputKeyEnum.collectionFilterVersion
+              ? collectionFilterVersion
+              : storeInput.value
         };
       })
       .concat(

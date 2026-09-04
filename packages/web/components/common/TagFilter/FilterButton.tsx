@@ -44,7 +44,7 @@ export const FilterSummaryValue = ({
   </Flex>
 );
 
-export type FilterButtonProps = Omit<FlexProps, 'children' | 'title' | 'value'> & {
+type FilterButtonProps = Omit<FlexProps, 'children' | 'title' | 'value'> & {
   title: ReactNode;
   value: ReactNode;
 };

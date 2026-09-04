@@ -37,11 +37,26 @@ import { SANDBOX_ICON } from '@fastgpt/global/core/ai/sandbox/tools';
 import SandboxConfigButton from '../../components/SandboxConfigButton';
 import { useUserStore } from '@/web/support/user/useUserStore';
 import DatasetCard from '@/components/core/app/DatasetCard';
+import DatasetTagFilterRows, {
+  DatasetTagFilterDeprecated,
+  DatasetTagFilterUpgradeButton,
+  TagFilterLogicToggle
+} from '@/components/core/dataset/DatasetTagFilterRows';
 import { useWelcomeTextFoldState } from '@/components/core/app/useAppEditorUIState';
 import {
   findClientModelByReference,
   resolveClientModelReferenceId
 } from '@/web/core/ai/model/modelReference';
+import { NodeInputKeyEnum, VARIABLE_NODE_ID } from '@fastgpt/global/core/workflow/constants';
+import {
+  createEmptyTagFilterValue,
+  DatasetTagFilterVersionEnum,
+  isDatasetTagFilterValue,
+  normalizeLegacyDatasetTagFilterValue,
+  resolveDatasetTagFilterVersion,
+  type DatasetTagFilterValue
+} from '@fastgpt/global/core/dataset/workflowTagFilter';
+import { form2AppWorkflow } from './utils';
 
 const DatasetSelectModal = dynamic(() => import('@/components/core/app/DatasetSelectModal'));
 const DatasetParamsModal = dynamic(() => import('@/components/core/app/DatasetParamsModal'));
@@ -82,7 +97,7 @@ const EditForm = ({
   const showSandbox = feConfigs.show_agent_sandbox;
   const { teamPlanStatus } = useUserStore();
   const enableSandbox = !teamPlanStatus?.standard || !!teamPlanStatus?.standard?.enableSandbox;
-  const { appDetail } = useContextSelector(AppContext, (v) => v);
+  const { appDetail, onSaveApp } = useContextSelector(AppContext, (v) => v);
   const selectDatasets = useMemo(() => appForm?.dataset?.datasets, [appForm]);
   const [, startTst] = useTransition();
   const isAgentSandboxEnabled = !!appForm.aiSettings.useAgentSandbox;
@@ -111,13 +126,46 @@ const EditForm = ({
         ...item,
         label: t(item.label as any),
         parent: {
-          id: 'VARIABLE_NODE_ID',
+          id: VARIABLE_NODE_ID,
           label: t('common:core.module.Variable'),
           avatar: 'core/workflow/template/variable'
         }
       })),
     [appForm.chatConfig.variables, t]
   );
+
+  const tagFilterReferenceList = useMemo(
+    () => [
+      {
+        label: t('common:core.module.Variable'),
+        value: VARIABLE_NODE_ID,
+        children: formatVariables.map((item) => ({
+          label: item.label,
+          value: item.key,
+          valueType: item.valueType
+        }))
+      }
+    ],
+    [formatVariables, t]
+  );
+
+  const onCollectionFilterMatchChange = useCallback(
+    (value: DatasetTagFilterValue | string) => {
+      setAppForm((state) => ({
+        ...state,
+        dataset: {
+          ...state.dataset,
+          collectionFilterMatch: value
+        }
+      }));
+    },
+    [setAppForm]
+  );
+  const isLegacyCollectionFilter =
+    resolveDatasetTagFilterVersion({
+      version: appForm.dataset[NodeInputKeyEnum.collectionFilterVersion],
+      filterValue: appForm.dataset.collectionFilterMatch
+    }) === DatasetTagFilterVersionEnum.legacy;
 
   const { llmModelList, reRankModelList } = useUserModelLists();
   const selectedModel =
@@ -486,6 +534,78 @@ const EditForm = ({
               />
             ))}
           </Grid>
+          {appForm.dataset.datasets?.length > 0 && feConfigs?.isPlus && (
+            <Box mt={4}>
+              <Flex alignItems={'center'} mb={2}>
+                <FormLabel color={'myGray.600'}>
+                  {isLegacyCollectionFilter
+                    ? t('workflow:collection_metadata_filter')
+                    : t('workflow:tag_filter')}
+                </FormLabel>
+                <QuestionTip
+                  ml={1}
+                  label={
+                    isLegacyCollectionFilter
+                      ? t('workflow:filter_description')
+                      : t('workflow:tag_filter_description')
+                  }
+                />
+                {isLegacyCollectionFilter ? (
+                  <>
+                    <Box flex={1} />
+                    <DatasetTagFilterUpgradeButton
+                      onUpgrade={async () => {
+                        const nextForm = {
+                          ...appForm,
+                          dataset: {
+                            ...appForm.dataset,
+                            [NodeInputKeyEnum.collectionFilterVersion]:
+                              DatasetTagFilterVersionEnum.structured,
+                            collectionFilterMatch: createEmptyTagFilterValue()
+                          }
+                        };
+                        const workflow = form2AppWorkflow(nextForm, t);
+                        await onSaveApp({
+                          ...workflow,
+                          isPublish: false,
+                          chatConfig: nextForm.chatConfig
+                        });
+                        setAppForm(nextForm);
+                      }}
+                    />
+                  </>
+                ) : (
+                  <Box ml={2}>
+                    <TagFilterLogicToggle
+                      value={
+                        isDatasetTagFilterValue(appForm.dataset.collectionFilterMatch)
+                          ? appForm.dataset.collectionFilterMatch
+                          : undefined
+                      }
+                      onChange={onCollectionFilterMatchChange}
+                    />
+                  </Box>
+                )}
+              </Flex>
+              {isLegacyCollectionFilter ? (
+                <DatasetTagFilterDeprecated
+                  value={normalizeLegacyDatasetTagFilterValue(
+                    appForm.dataset.collectionFilterMatch
+                  )}
+                  onChange={onCollectionFilterMatchChange}
+                  variables={formatVariables}
+                  variableLabels={formatVariables}
+                />
+              ) : (
+                <DatasetTagFilterRows
+                  value={appForm.dataset.collectionFilterMatch}
+                  onChange={onCollectionFilterMatchChange}
+                  datasetIds={appForm.dataset.datasets.map((item) => item.datasetId)}
+                  referenceList={tagFilterReferenceList}
+                />
+              )}
+            </Box>
+          )}
         </Box>
 
         {/* File select */}
