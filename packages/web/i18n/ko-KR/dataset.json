@@ -185,7 +185,7 @@
   "tag.batch_add": "태그 일괄 추가",
   "tag.batch_edit": "태그 일괄 수정",
   "tag.batch_remove": "태그 일괄 제거",
-  "tag.batch_selected_files": "선택됨 ({{num}})개 파일",
+  "tag.batch_selected_files": "선택됨 ( {{num}} )개 파일",
   "tag.cancel": "취소",
   "tag.create_failed": "태그 추가 실패, 다시 시도해 주세요",
   "tag.create_option": "옵션 생성",

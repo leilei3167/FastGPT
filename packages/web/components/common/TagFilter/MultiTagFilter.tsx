@@ -320,6 +320,10 @@ const MultiTagFilter = ({
                           pointerEvents={'none'}
                           size={'sm'}
                           icon={<MyIcon name={'common/check'} w={'12px'} />}
+                          sx={{
+                            // 自定义勾图标不会走 Chakra 未选中时的隐藏，悬浮会露出白勾
+                            '.chakra-checkbox__control:not([data-checked]) svg': { opacity: 0 }
+                          }}
                         />
                         <Box
                           minW={0}

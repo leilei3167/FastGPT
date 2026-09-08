@@ -154,12 +154,19 @@ const CollectionTagBatchModal = ({
         tags: body.tags
       }),
     {
-      onSuccess() {
+      onSuccess(_res, params) {
+        const requestMode = params?.[0]?.mode;
+        toast({
+          title:
+            requestMode === BatchCollectionTagModeEnum.remove
+              ? t('dataset:tag.delete_success')
+              : t('dataset:tag.setting_success'),
+          status: 'success'
+        });
         void loadAllDatasetTags();
         onSuccess?.();
         onClose();
       },
-      successToast: t('dataset:tag.setting_success'),
       errorToast: t('dataset:tag.save_failed')
     }
   );

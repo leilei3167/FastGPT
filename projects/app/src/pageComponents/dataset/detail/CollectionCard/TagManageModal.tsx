@@ -27,8 +27,11 @@ const TAG_TABLE_COLUMNS = 'minmax(0, 1fr) 180px 100px';
 const OPTION_ROW_HEIGHT = 32;
 const OPTION_ROW_GAP = 2;
 const OPTION_LIST_MAX_ROWS = 4;
+const OPTION_LIST_PADDING = 4;
 const OPTION_LIST_MAX_H =
-  OPTION_ROW_HEIGHT * OPTION_LIST_MAX_ROWS + OPTION_ROW_GAP * (OPTION_LIST_MAX_ROWS - 1);
+  OPTION_ROW_HEIGHT * OPTION_LIST_MAX_ROWS +
+  OPTION_ROW_GAP * (OPTION_LIST_MAX_ROWS - 1) +
+  OPTION_LIST_PADDING * 2;
 
 const normalizeTagOptions = (nextOptions: string[]) => [
   ...new Set(nextOptions.map((option) => option.trim()).filter(Boolean))
@@ -127,7 +130,7 @@ const TagOptionManagePopover = ({
       hasArrow={false}
       offset={[0, 4]}
       closeOnBlur={true}
-      w={'152px'}
+      w={'160px'}
       p={1.5}
       borderRadius={'sm'}
       boxShadow={'md'}
@@ -139,23 +142,12 @@ const TagOptionManagePopover = ({
         void persistOptions(draftOptionsRef.current);
       }}
       Trigger={
-        <Flex
-          as={'button'}
-          type={'button'}
-          aria-label={t('dataset:tag.manage_options')}
-          alignItems={'center'}
-          justifyContent={'center'}
-          p={1}
-          borderRadius={'sm'}
+        <TagActionButton
+          label={t('common:Setting')}
+          icon={<MyIcon name={'common/setting'} w={'16px'} h={'16px'} />}
           color={'myGray.600'}
-          cursor={'pointer'}
-          _hover={{
-            bg: 'myGray.05',
-            color: 'primary.700'
-          }}
-        >
-          <MyIcon name={'common/setting'} w={'16px'} h={'16px'} />
-        </Flex>
+          hoverColor={'primary.700'}
+        />
       }
     >
       {() => (
@@ -183,7 +175,7 @@ const TagOptionManagePopover = ({
               overflowY={'auto'}
               direction={'column'}
               gap={`${OPTION_ROW_GAP}px`}
-              mt={0.5}
+              p={1}
             >
               {draftOptions.map((opt, index) => (
                 <Flex key={index} gap={1} alignItems={'center'} w={'full'}>
@@ -203,6 +195,7 @@ const TagOptionManagePopover = ({
                     borderColor={'myGray.200'}
                     placeholder={t('dataset:tag.enter_option')}
                     _focus={{
+                      zIndex: 1,
                       borderColor: 'primary.600',
                       boxShadow: 'focus'
                     }}

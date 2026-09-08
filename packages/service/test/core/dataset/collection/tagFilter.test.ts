@@ -7,7 +7,7 @@ describe('buildCollectionListTagMatch', () => {
     expect(buildCollectionListTagMatch([])).toEqual({});
   });
 
-  it('uses $elemMatch for one tag and $and across tags', () => {
+  it('uses $elemMatch for one tag and $or across tags', () => {
     expect(buildCollectionListTagMatch([{ tagId: 'type', values: ['PRD'] }])).toEqual({
       tags: {
         $elemMatch: {
@@ -23,7 +23,7 @@ describe('buildCollectionListTagMatch', () => {
         { tagId: 'version', values: [2] }
       ])
     ).toEqual({
-      $and: [
+      $or: [
         {
           tags: {
             $elemMatch: {

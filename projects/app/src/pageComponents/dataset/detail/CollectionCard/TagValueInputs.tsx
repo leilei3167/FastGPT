@@ -29,6 +29,7 @@ export const tagInputBaseStyles: InputProps = {
   bg: 'white',
   fontSize: 'sm',
   color: 'myGray.900',
+  px: 3,
   _hover: {
     borderColor: 'primary.300'
   },
@@ -61,28 +62,26 @@ const StringTagInput = ({
   );
 };
 
-const embeddedFieldStyles = {
-  border: 'none',
-  boxShadow: 'none',
-  _hover: { border: 'none' },
-  _focus: { border: 'none', boxShadow: 'none' }
+/** 与左侧切换区拼接时去掉左圆角，保留自身边框与 focus（对齐判断器 / 变量更新）。 */
+const joinedFieldStyles = {
+  borderLeftRadius: 'none' as const
 };
 
 export const NumberTagInput = ({
   value,
   onChange,
   placeholder,
-  showStepper,
-  embedded
+  showStepper = true,
+  joined
 }: {
   value?: number | string;
   onChange: (val: number | '') => void;
   placeholder?: string;
   showStepper?: boolean;
-  embedded?: boolean;
+  joined?: boolean;
 }) => {
   const { t } = useTranslation();
-  const placeholderText = placeholder ?? t('dataset:tag.fill_number');
+  const placeholderText = placeholder ?? t('dataset:tag.fill_integer');
 
   if (showStepper) {
     return (
@@ -91,12 +90,22 @@ export const NumberTagInput = ({
         h={'36px'}
         w={'100%'}
         fontSize={'sm'}
+        precision={0}
+        step={1}
         inputFieldProps={{
           h: '36px',
+          px: 3,
           bg: 'white',
           fontSize: 'sm',
           color: 'myGray.900',
-          ...(embedded ? embeddedFieldStyles : {})
+          textAlign: 'left',
+          borderRadius: 'sm',
+          borderColor: 'myGray.200',
+          _focus: {
+            borderColor: 'primary.600',
+            boxShadow: 'focus'
+          },
+          ...(joined ? joinedFieldStyles : {})
         }}
         value={value === undefined || value === '' ? '' : Number(value)}
         placeholder={placeholderText}
@@ -108,7 +117,7 @@ export const NumberTagInput = ({
   return (
     <Input
       {...tagInputBaseStyles}
-      {...(embedded ? embeddedFieldStyles : {})}
+      {...(joined ? joinedFieldStyles : {})}
       type={'number'}
       value={value === undefined ? '' : value}
       placeholder={placeholderText}
@@ -131,21 +140,19 @@ export const DateTimeTagInput = ({
   value,
   onChange,
   placeholder,
-  embedded
+  joined
 }: {
   value?: number | string;
   onChange: (val: number) => void;
   placeholder?: string;
-  embedded?: boolean;
+  joined?: boolean;
 }) => (
   <SingleDateTimePicker
     value={value === undefined || value === '' ? undefined : Number(value)}
     onChange={onChange}
     placeholder={placeholder}
     w={'100%'}
-    h={embedded ? '36px' : undefined}
-    hideCalendarIcon={embedded}
-    {...(embedded ? embeddedFieldStyles : {})}
+    {...(joined ? joinedFieldStyles : {})}
   />
 );
 
@@ -239,7 +246,7 @@ export const TagNameSelect = ({
               }}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <Flex maxH={'160px'} overflowY={'auto'} direction={'column'} gap={'2px'}>
+            <Flex maxH={'160px'} overflowY={'auto'} direction={'column'} gap={1}>
               {filteredOptions.length === 0 ? (
                 <Box px={1} py={2} fontSize={'xs'} color={'myGray.500'} textAlign={'center'}>
                   {t('common:no_select_data')}
@@ -316,10 +323,12 @@ const ArraySelectedChip = ({
     h={'24px'}
     bg={'myGray.100'}
     color={'myGray.900'}
-    px={1.5}
+    px={1}
+    py={'2px'}
     borderRadius={'xs'}
-    fontSize={'xs'}
-    lineHeight={'16px'}
+    fontSize={'sm'}
+    lineHeight={'20px'}
+    letterSpacing={'0.25px'}
     flexShrink={0}
   >
     <Box maxW={'120px'} noOfLines={1}>
@@ -331,14 +340,14 @@ const ArraySelectedChip = ({
         type={'button'}
         alignItems={'center'}
         justifyContent={'center'}
-        w={'14px'}
-        h={'14px'}
+        w={'16px'}
+        h={'16px'}
         cursor={'pointer'}
         color={'myGray.500'}
         _hover={{ color: 'myGray.700' }}
         onClick={(e) => onRemove(opt, e)}
       >
-        <MyIcon name={'close'} w={'12px'} h={'12px'} />
+        <MyIcon name={'close'} w={'16px'} h={'16px'} />
       </Flex>
     )}
   </Flex>
@@ -349,10 +358,10 @@ const ArrayOverflowChip = ({ count }: { count: number }) => (
     data-overflow-chip
     alignItems={'center'}
     h={'24px'}
-    px={1.5}
+    px={2}
     bg={'myGray.100'}
     color={'myGray.600'}
-    borderRadius={'xs'}
+    borderRadius={'full'}
     fontSize={'xs'}
     lineHeight={'16px'}
     flexShrink={0}
@@ -368,7 +377,7 @@ export const ArrayTagSelect = ({
   onCreateOption,
   allowCreate = true,
   placeholder,
-  embedded
+  joined
 }: {
   options: string[];
   value?: string[];
@@ -376,7 +385,7 @@ export const ArrayTagSelect = ({
   onCreateOption?: (option: string) => void;
   allowCreate?: boolean;
   placeholder?: string;
-  embedded?: boolean;
+  joined?: boolean;
 }) => {
   const { t } = useTranslation();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -455,6 +464,7 @@ export const ArrayTagSelect = ({
       placement={'bottom-start'}
       closeOnBlur
       matchWidth
+      gutter={4}
     >
       <PopoverTrigger>
         <Flex
@@ -466,7 +476,7 @@ export const ArrayTagSelect = ({
           overflow={'hidden'}
           borderColor={isOpen ? 'primary.600' : 'myGray.200'}
           boxShadow={isOpen ? 'focus' : 'none'}
-          {...(embedded ? embeddedFieldStyles : {})}
+          {...(joined ? joinedFieldStyles : {})}
         >
           <Flex position={'relative'} flex={'1 1 auto'} minW={0} h={'24px'} alignItems={'center'}>
             {value.length === 0 ? (
@@ -520,7 +530,7 @@ export const ArrayTagSelect = ({
       </PopoverTrigger>
       <Portal>
         <PopoverContent
-          w={embedded ? 'full' : '370px'}
+          w={joined ? 'full' : '370px'}
           p={1.5}
           bg={'white'}
           borderRadius={'sm'}
@@ -590,11 +600,11 @@ export const ArrayTagSelect = ({
                     {t('common:All')}
                   </Box>
                 </Flex>
-                <Box borderBottom={'1px solid'} borderColor={'myGray.200'} my={0.5} />
+                <Box borderBottom={'1px solid'} borderColor={'myGray.150'} />
               </>
             )}
 
-            <Flex maxH={'160px'} overflowY={'auto'} direction={'column'} gap={'2px'}>
+            <Flex maxH={'160px'} overflowY={'auto'} direction={'column'} gap={1}>
               {filteredOptions.length === 0 && !canCreate ? (
                 <Box px={1} py={2} fontSize={'xs'} color={'myGray.500'} textAlign={'center'}>
                   {t('common:no_select_data')}
@@ -611,6 +621,7 @@ export const ArrayTagSelect = ({
                       px={1}
                       borderRadius={'xs'}
                       cursor={'pointer'}
+                      bg={isChecked ? ARRAY_OPTION_HOVER_BG : 'transparent'}
                       _hover={{ bg: ARRAY_OPTION_HOVER_BG }}
                       onClick={() => handleToggleOption(opt)}
                     >
@@ -619,9 +630,14 @@ export const ArrayTagSelect = ({
                         onChange={() => handleToggleOption(opt)}
                         onClick={(e) => e.stopPropagation()}
                         size={'sm'}
+                        borderRadius={'xs'}
                         icon={<MyIcon name={'common/check'} w={'10px'} />}
+                        sx={{
+                          // 自定义勾图标不会走 Chakra 未选中时的隐藏，悬浮会露出白勾
+                          '.chakra-checkbox__control:not([data-checked]) svg': { opacity: 0 }
+                        }}
                       />
-                      <Box fontSize={'xs'} color={'myGray.600'} noOfLines={1}>
+                      <Box fontSize={'xs'} fontWeight={'medium'} color={'myGray.600'} noOfLines={1}>
                         {opt}
                       </Box>
                     </Flex>
@@ -671,7 +687,7 @@ export const TagValueField = ({
   if (tag.tagType === DatasetCollectionTagTypeEnum.number) {
     return (
       <NumberTagInput
-        showStepper={numberShowStepper}
+        showStepper={numberShowStepper ?? true}
         value={value as number}
         placeholder={numberPlaceholder}
         onChange={(val) => onChange(val)}

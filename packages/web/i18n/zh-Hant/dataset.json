@@ -185,7 +185,7 @@
   "tag.batch_add": "批量新增標籤",
   "tag.batch_edit": "批量修改標籤",
   "tag.batch_remove": "批量移除標籤",
-  "tag.batch_selected_files": "已選 ({{num}}) 個檔案",
+  "tag.batch_selected_files": "已選 ( {{num}} ) 個檔案",
   "tag.cancel": "取消",
   "tag.create_failed": "標籤新增失敗，請重試",
   "tag.create_option": "建立選項",

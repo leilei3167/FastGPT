@@ -9,7 +9,7 @@ import { MongoDatasetCollection } from './schema';
 
 /**
  * 按 tagFilters 组装 Collection 列表的标签过滤条件。
- * 同一标签多值为 OR（value $in），不同标签为 AND。
+ * 多个标签或同一标签多值均为 OR。
  */
 export const buildCollectionListTagMatch = (tagFilters: CollectionTagFilterItem[] = []) => {
   if (tagFilters.length === 0) return {};
@@ -24,7 +24,7 @@ export const buildCollectionListTagMatch = (tagFilters: CollectionTagFilterItem[
   }));
 
   if (conditions.length === 1) return conditions[0];
-  return { $and: conditions };
+  return { $or: conditions };
 };
 
 type UsedTagValueGroup = {

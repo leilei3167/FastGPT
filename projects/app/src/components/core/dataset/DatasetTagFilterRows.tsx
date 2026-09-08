@@ -43,6 +43,8 @@ import { TagFilterFieldSelect, TagFilterOpSelect } from './TagFilterSelects';
 export type TagFilterReferenceList = {
   label: string | React.ReactNode;
   value: string;
+  name?: string;
+  avatar?: string;
   children: {
     label: string;
     value: string;
@@ -145,15 +147,14 @@ export const DatasetTagFilterDeprecated = ({
   );
 };
 
-const valueCellEmbeddedStyles = {
-  border: 'none',
-  boxShadow: 'none',
+/** 与判断器 IfElse 一致：左侧自带右边框缺失，右侧控件自带边框与 focus，不做外层统一包边。 */
+const valueCellJoinedStyles = {
   h: '36px',
   minH: '36px',
   maxH: '36px',
-  borderRadius: 0,
-  _hover: { border: 'none' },
-  _focus: { border: 'none', boxShadow: 'none' }
+  borderRadius: 'sm',
+  borderLeftRadius: 'none' as const,
+  borderColor: 'myGray.200'
 };
 
 const TagFilterValueCell = ({
@@ -177,7 +178,7 @@ const TagFilterValueCell = ({
       return (
         <Input
           {...tagInputBaseStyles}
-          {...valueCellEmbeddedStyles}
+          {...valueCellJoinedStyles}
           isDisabled
           placeholder={t('workflow:tag_filter_input_value')}
         />
@@ -187,7 +188,7 @@ const TagFilterValueCell = ({
       return (
         <NumberTagInput
           showStepper
-          embedded
+          joined
           placeholder={t('workflow:tag_filter_input_value')}
           value={typeof condition.value === 'number' ? condition.value : ''}
           onChange={(val) => onChange({ value: val === '' ? undefined : val })}
@@ -197,7 +198,7 @@ const TagFilterValueCell = ({
     if (condition.tagType === DatasetCollectionTagTypeEnum.datetime) {
       return (
         <DateTimeTagInput
-          embedded
+          joined
           value={typeof condition.value === 'number' ? condition.value : ''}
           placeholder={t('workflow:tag_filter_select_time')}
           onChange={(val) => onChange({ value: val })}
@@ -206,7 +207,7 @@ const TagFilterValueCell = ({
     }
     return (
       <ArrayTagSelect
-        embedded
+        joined
         allowCreate={false}
         options={option?.options ?? []}
         placeholder={t('workflow:tag_filter_select_option')}
@@ -224,21 +225,19 @@ const TagFilterValueCell = ({
       flexShrink={0}
       h={'36px'}
       alignItems={'stretch'}
-      border={'1px solid'}
-      borderColor={'myGray.200'}
-      borderRadius={'sm'}
-      bg={'white'}
-      overflow={'hidden'}
     >
       {isCollectionId ? (
         <Flex
           w={'41px'}
           minW={'41px'}
           maxW={'41px'}
-          h={'100%'}
+          h={'36px'}
           px={'12px'}
-          borderRight={'1px solid'}
+          border={'1px solid'}
+          borderRight={'none'}
           borderColor={'myGray.200'}
+          borderLeftRadius={'sm'}
+          bg={'white'}
           alignItems={'center'}
           justifyContent={'center'}
           flexShrink={0}
@@ -262,11 +261,14 @@ const TagFilterValueCell = ({
             w={'63px'}
             minW={'63px'}
             maxW={'63px'}
-            h={'100%'}
+            h={'36px'}
             px={'12px'}
             spacing={'6px'}
-            borderRight={'1px solid'}
+            border={'1px solid'}
+            borderRight={'none'}
             borderColor={'myGray.200'}
+            borderLeftRadius={'sm'}
+            bg={'white'}
             justifyContent={'center'}
             cursor={'pointer'}
             flexShrink={0}
@@ -295,7 +297,7 @@ const TagFilterValueCell = ({
           </HStack>
         </MyTooltip>
       )}
-      <Box flex={1} minW={0} h={'100%'}>
+      <Box flex={1} minW={0} h={'36px'}>
         {isReference ? (
           <ReferSelector
             placeholder={t('common:select_reference_variable')}
@@ -308,11 +310,10 @@ const TagFilterValueCell = ({
             onSelect={(e) => onChange({ value: e as ReferenceItemValueType })}
             isArray={false}
             ButtonProps={{
-              ...valueCellEmbeddedStyles,
+              ...valueCellJoinedStyles,
               size: 'sm',
               w: '100%',
-              px: 3,
-              borderWidth: 0
+              px: 3
             }}
           />
         ) : (

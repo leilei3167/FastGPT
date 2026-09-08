@@ -122,23 +122,33 @@ export const SingleDateTimePicker = ({
     >
       <PopoverTrigger>
         <Flex
-          h={'36px'}
+          w={'100%'}
           borderRadius={'sm'}
           border={'1px solid'}
           borderColor={isOpen ? 'primary.600' : 'myGray.200'}
           boxShadow={isOpen ? 'focus' : 'none'}
           bg={'white'}
           fontSize={'sm'}
+          lineHeight={'20px'}
+          letterSpacing={'0.25px'}
           color={'myGray.900'}
           alignItems={'center'}
           justifyContent={'space-between'}
           px={3}
+          overflow={'hidden'}
           cursor={isDisabled ? 'not-allowed' : 'pointer'}
           opacity={isDisabled ? 0.6 : 1}
           _hover={isDisabled ? undefined : { borderColor: 'primary.300' }}
+          h={'36px'}
           {...triggerProps}
         >
-          <Box color={displayText ? 'myGray.900' : 'myGray.500'} noOfLines={1}>
+          <Box
+            minW={0}
+            color={displayText ? 'myGray.900' : 'myGray.500'}
+            noOfLines={1}
+            lineHeight={'20px'}
+            letterSpacing={'0.25px'}
+          >
             {displayText || placeholder || t('common:datetime_picker.placeholder')}
           </Box>
           {!hideCalendarIcon && (

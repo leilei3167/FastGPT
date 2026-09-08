@@ -185,7 +185,7 @@
   "tag.batch_add": "Batch add tags",
   "tag.batch_edit": "Batch edit tags",
   "tag.batch_remove": "Batch remove tags",
-  "tag.batch_selected_files": "({{num}}) files selected",
+  "tag.batch_selected_files": "( {{num}} ) files selected",
   "tag.cancel": "Cancel",
   "tag.create_failed": "Failed to create tag, please try again",
   "tag.create_option": "Create option",
